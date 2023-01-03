@@ -14,7 +14,7 @@
 <div align=center>
   <img width="200" alt="스크린샷 2021-12-05 오후 9 41 41" src="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbGe1WA%2FbtrVhSFxkqc%2FrdlWb13VKaeA8WFeWof9U1%2Fimg.png">
 </div>
-<h2 align=center>운동하고 싶은 모든 여자들을 위한 여성 스포츠 활동 매칭 플랫폼, 우피치</h2>
+<h2 align=center>시각장애인들의 원활한 이동 길 위 안전을 책임, ONE_EYES</h2>
 
 <div align=center>
 <img width="905" alt="스크린샷 2021-12-05 오후 9 52 15" src="https://user-images.githubusercontent.com/54254402/144747317-5af71998-a855-474b-9d20-79a565411b59.png">
