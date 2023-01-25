@@ -7,7 +7,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class retrofit_client {
-    private static final String BASE_URL = "https://api.kickgoing.io/v4/";
+    private static final String BASE_URL = "http://localhost:8080/api/"; // api url 주소
 
 
     public static Retrofit_interface getApiService(){return getInstance().create(Retrofit_interface.class);}
