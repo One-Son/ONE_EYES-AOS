@@ -7,32 +7,62 @@ import java.util.Arrays;
 import java.util.List;
 
 public class data_model {
-        @SerializedName("kickscooters")
+        @SerializedName("isSuccess")
         @Expose
-        private List kickscooters;
+        private Boolean isSuccess;
 
-        @SerializedName("clustered_kickscooters")
+        @SerializedName("code")
         @Expose
-        private List clustered_kickscooters;
+        private int code;
 
-        @SerializedName("service_area_centers")
+        @SerializedName("message")
         @Expose
-        private List service_area_centers;
+        private String message;
+
+        @SerializedName("result")
+        @Expose
+        private List result;
 
 
-
-
-        public List getUserId(){
-                return kickscooters;
+        public Boolean getIsSuccess(){
+                return isSuccess;
         }
 
-        public List getID(){
-                return clustered_kickscooters;
+        public String getMessage(){
+                return message;
         }
 
-        public List getTitle(){
-                return service_area_centers;
+        public int getCode(){
+                return code;
         }
 
 
+        public List getResult(){
+                return result;
+        }
+
+
+//        @SerializedName("kickscooters")
+//        @Expose
+//        private List kickscooters;
+//
+//        @SerializedName("clustered_kickscooters")
+//        @Expose
+//        private List clustered_kickscooters;
+//
+//        @SerializedName("service_area_centers")
+//        @Expose
+//        private List service_area_centers;
+//
+//        public List getMessage(){
+//                return kickscooters;
+//       }
+//
+//        public List getCode(){
+//                return clustered_kickscooters;
+//        }
+//
+//        public List getResult(){
+//                return service_area_centers;
+//        }
 }
