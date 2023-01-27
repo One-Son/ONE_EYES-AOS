@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         textView = findViewById(R.id.txt_view);
 
         call = retrofit_client.getApiService().test_api_get("37.53505700000015","126.98862500000007");//url 파라미터
-        Log.d("test2", "test2 "+call.request().url());
+        Log.e("test2", "test2 "+call.request().url());
 
         call.enqueue(new Callback<data_model>(){
             //콜백 받는 부분
@@ -71,12 +71,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(response.code()==200){
                     data_model result = response.body();
                     String str;
-                    str= //result.getIsSuccess() +"\n"+
-                            //result.getMessage()+"\n";
-//                            result.getCode()+"\n"+
+                    str= result.getIsSuccess() +"\n"+
+                            result.getMessage()+"\n"+
+                            result.getCode()+"\n"+
                             result.getResult()+"\n";
                     textView.setText(str);
-                    Log.d("test2", "test2 "+str);
+                    Log.e("test2", "test2 "+str);
                     
                     //updataMapMarkers(result);
                 }
