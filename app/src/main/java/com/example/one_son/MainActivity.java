@@ -8,6 +8,7 @@ import android.graphics.PointF;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.one_son.Retrofit.data_model;
 import com.example.one_son.Retrofit.retrofit_client;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     textView.setText(str);
                     Log.e("test2", "test2 "+str);
                     
-                    //updataMapMarkers(result);
+                    updataMapMarkers(result);
                 }
                 
             }
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    /*
+
     private void updataMapMarkers(data_model result) {
         resetMarkerList();
         if(result.getResult() != null){
@@ -120,12 +121,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     markerList.add(marker);
 
             }
+            /*
+            네이버 지도 api 현위치 찍기
+            Toast는 밑에 알림같은거
+            location.getLatitude(), location.getLongitude()가 위도 경도
+             */
+            naverMap.addOnLocationChangeListener(location ->
+                    Toast.makeText(this,
+                            location.getLatitude() + ", " + location.getLongitude(),
+                            Toast.LENGTH_SHORT).show());
         }
 
 
     }
 
-     */
+
 
     private void resetMarkerList() {
         if(markerList != null && markerList.size() > 0){
