@@ -202,7 +202,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
         if(minDistance >= MAX_DISTANCE) return;
-        vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
+        if(minDistance < 1) minDistance = 1.0;
+        //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
+        long[] pattern = {(long) (minDistance * 10), (long) (minDistance * 10)};
+        vibrator.vibrate(pattern, (int) (250 / minDistance / minDistance));
     }
 
     /**
