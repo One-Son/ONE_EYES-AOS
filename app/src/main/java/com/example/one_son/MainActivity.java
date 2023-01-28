@@ -10,7 +10,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.example.one_son.Retrofit.data_model;
 import com.example.one_son.Retrofit.retrofit_client;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private InfoWindow infoWindow;
     private List<Marker> markerList = new ArrayList<Marker>();
     private boolean isCameraAnimated = false;
+    private double minDistance = MAX_DISTANCE;
 
     private double userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
@@ -126,10 +125,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onFailure(Call<data_model> call, Throwable t) {
                         }
                     });//60초마다 실행
-                    Thread.sleep(60000); // 1초간 Thread를 잠재운다
+                    // 거리에 따른 진동 발생 (수정 예정)
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrateByDistance(minDistance, vibrator);
+                    Log.e("vibrate", vibrator.hasVibrator() + "");
+
+                    Thread.sleep(5000); // 5초간 Thread를 잠재운다
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    ;
                 }
 
                 Log.i("경과된 시간 : ", Integer.toString(second));
@@ -190,16 +193,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.e("latlng", userLat + ", " + userLng);
 
                 //현위치로 부터 가장 가까운 스쿠터 거리 계산
-                Double minDistance = MAX_DISTANCE;
                 minDistance = calcMinDistance(userLat, userLng, minDistance);
-                Log.e("min",minDistance + "");
-
-
-
-                // 거리에 따른 진동 발생 (수정 예정)
-                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                vibrateByDistance(minDistance, vibrator);
-                Log.e("vibrate", vibrator.hasVibrator() + "");
+                Log.e("min",minDistance + ", " +mappoint.size());
             }
         });
     }
@@ -207,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
         if(minDistance >= MAX_DISTANCE) return;
-        vibrator.vibrate((int) Math.round(minDistance)); // 1000이 1초간 진동
+        vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
     }
 
     /**
