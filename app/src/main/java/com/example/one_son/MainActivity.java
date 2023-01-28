@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Context;
 import android.graphics.PointF;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.one_son.Retrofit.data_model;
 import com.example.one_son.Retrofit.retrofit_client;
@@ -36,6 +38,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final int ACCESS_LOCATION_PERMISSION_REQUEST_CODE = 100;
+    private static final Double MAX_DISTANCE = 200.0;
 
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
@@ -43,12 +46,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private List<Marker> markerList = new ArrayList<Marker>();
     private boolean isCameraAnimated = false;
 
+    private double userLat, userLng; // 사용자 좌표
+    private List<Map<String ,Object>> mappoint;
+
+    public MainActivity() {
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         TextView textView;
         Call<data_model> call;
@@ -98,26 +106,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void updataMapMarkers(data_model result) {
         resetMarkerList();
         if(result.getResult() != null){
-            List<Map<String,Object>> Mappoint = new ArrayList<>(result.getResult());
+            mappoint = new ArrayList<>(result.getResult());
 //            latng.addAll(result.getResult());
-            for (Map<String, Object> scooter: Mappoint) {
-                    scooter.get("lng");
-                    Marker marker = new Marker();
-                    marker.setPosition(new LatLng((Double) scooter.get("lat"), (Double) scooter.get("lng")));
-                    marker.setIcon(OverlayImage.fromResource(R.drawable.ic_baseline_location_on_24));
-                    marker.setAnchor(new PointF(0.5f, 1.0f));
-                    marker.setMap(naverMap);
-                    markerList.add(marker);
+            for (Map<String, Object> scooter: mappoint) {
+                scooter.get("lng");
+                Marker marker = new Marker();
+                marker.setPosition(new LatLng((Double) scooter.get("lat"), (Double) scooter.get("lng")));
+                marker.setIcon(OverlayImage.fromResource(R.drawable.ic_baseline_location_on_24));
+                marker.setAnchor(new PointF(0.5f, 1.0f));
+                marker.setMap(naverMap);
+                markerList.add(marker);
             }
-            /*
-            네이버 지도 api 현위치 찍기
-            Toast는 밑에 알림같은거
-            location.getLatitude(), location.getLongitude()가 위도 경도
-             */
-            naverMap.addOnLocationChangeListener(location ->
-                    Toast.makeText(this,
-                            location.getLatitude() + ", " + location.getLongitude(),
-                            Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -145,7 +144,57 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
         UiSettings uiSettings = naverMap.getUiSettings();
         uiSettings.setLocationButtonEnabled(true);
+
+        //현 위치 갱신
+        naverMap.addOnLocationChangeListener(new NaverMap.OnLocationChangeListener(){
+
+            @Override
+            public void onLocationChange(@NonNull Location location) {
+                userLat = location.getLatitude();
+                userLng = location.getLongitude();
+
+                Log.e("latlng", userLat + ", " + userLng);
+
+                //현위치로 부터 가장 가까운 스쿠터 거리 계산
+                Double minDistance = MAX_DISTANCE;
+                minDistance = calcMinDistance(userLat, userLng, minDistance);
+                Log.e("min",minDistance + "");
+
+                // 거리에 따른 진동 발생 (수정 예정)
+                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                vibrateByDistance(minDistance, vibrator);
+                Log.e("vibrate", vibrator.hasVibrator() + "");
+            }
+        });
     }
+
+    // 진동 발생 함수
+    private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
+        if(minDistance >= MAX_DISTANCE) return;
+        vibrator.vibrate((int) Math.round(minDistance)); // 1000이 1초간 진동
+    }
+
+    /**
+     * 최소 거리 구하기
+     * mappoint는 전역변수
+     * @param userLat 유저 위도
+     * @param userLng 유저 경도
+     * @param minDistance 현재 최소 값
+     * @return 최소 값
+     */
+    private Double calcMinDistance(Double userLat, Double userLng, Double minDistance) {
+        if(userLat.equals(0.0d) || userLng.equals(0.0d)) return minDistance;
+        Double result = minDistance;
+        for (Map<String, Object> scooter: mappoint) {
+            Double distance = distanceByHarversine(userLat, userLng,
+                    (Double) scooter.get("lat"), (Double) scooter.get("lng"));
+            if(distance < minDistance){
+                result = distance;
+            }
+        }
+        return result;
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
