@@ -44,10 +44,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isCameraAnimated = false;
 
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,13 +77,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     
                     updataMapMarkers(result);
                 }
-                
             }
-
 
             @Override
             public void onFailure(Call<data_model> call, Throwable t) {
-
             }
         });
 
@@ -100,11 +93,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
-
-
-
     }
-
 
     private void updataMapMarkers(data_model result) {
         resetMarkerList();
@@ -119,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     marker.setAnchor(new PointF(0.5f, 1.0f));
                     marker.setMap(naverMap);
                     markerList.add(marker);
-
             }
             /*
             네이버 지도 api 현위치 찍기
@@ -131,8 +119,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             location.getLatitude() + ", " + location.getLongitude(),
                             Toast.LENGTH_SHORT).show());
         }
-
-
     }
 
 
@@ -159,12 +145,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
         UiSettings uiSettings = naverMap.getUiSettings();
         uiSettings.setLocationButtonEnabled(true);
-
-
-
-
-
-
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -178,4 +158,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * 위도 경도에 따른 거리 계산 (m단위)
+     * @param lat1 위도1
+     * @param lng1 경도1
+     * @param lat2 위도2
+     * @param lng2 경도2
+     * @return 거리
+     */
+    private double distanceByHarversine(double lat1, double lng1, double lat2, double lng2){
+        double r = 6371; // 지구 반지름
+        double toRadian = Math.PI / 180;
+
+        double deltaLatitude = Math.abs(lat1 - lat2) * toRadian;
+        double deltaLongitude = Math.abs(lng1 - lng2) * toRadian;
+
+        double sinDeltaLat = Math.sin(deltaLatitude / 2);
+        double sinDeltaLng = Math.sin(deltaLongitude / 2);
+
+        double squareRoot = Math.sqrt(
+                sinDeltaLat * sinDeltaLat +
+                        Math.cos(lat1 * toRadian) * Math.cos(lat2 * toRadian)
+                                * sinDeltaLng * sinDeltaLng);
+
+        double distance = 2 * r * Math.asin(squareRoot) * 1000;
+
+        return distance;
+    }
 }
