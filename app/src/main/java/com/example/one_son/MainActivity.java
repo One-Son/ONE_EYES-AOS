@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
 
@@ -48,8 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
 
-    public MainActivity() {
-    }
+
 
 
     @Override
@@ -60,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         APIThread thread = new APIThread();
         thread.start();
+
+        DistanceThread thread2 = new DistanceThread();
+        thread2.start();
 
         NaverMapOptions options = new NaverMapOptions()
                 .locationButtonEnabled(true);
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      *  사용자 좌표 변수명 userLat, userLng
      * */
     private class APIThread extends Thread {
-        private static final String TAG = "APIThread";
+
 
         public APIThread() {
             // 초기화 작업
@@ -92,6 +95,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             int second = 0;
 
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while (true) {
                 second++;
                 try {
@@ -126,6 +134,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     });//60초마다 실행
                     // 거리에 따른 진동 발생 (수정 예정)
+
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrateByDistance(minDistance, vibrator);
+                    Log.e("vibrate", vibrator.hasVibrator() + "");
+
+                    Thread.sleep(60000); // 5초간 Thread를 잠재운다
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Log.i("경과된 시간 : ", Integer.toString(second));
+            }
+
+        }
+    }
+
+
+    private class DistanceThread extends Thread {
+
+
+        public DistanceThread() {
+            // 초기화 작업
+        }
+
+        public void run() {
+
+            while (true) {
+
+                try {
+
+                    // 거리에 따른 진동 발생 (수정 예정)
+
                     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     vibrateByDistance(minDistance, vibrator);
                     Log.e("vibrate", vibrator.hasVibrator() + "");
@@ -135,8 +175,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     e.printStackTrace();
                 }
 
-                Log.i("경과된 시간 : ", Integer.toString(second));
+
             }
+
         }
     }
 
@@ -194,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //현위치로 부터 가장 가까운 스쿠터 거리 계산
                 minDistance = calcMinDistance(userLat, userLng, minDistance);
-                Log.e("min",minDistance + ", " +mappoint.size());
+
             }
         });
     }
@@ -217,8 +258,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @return 최소 값
      */
     private Double calcMinDistance(Double userLat, Double userLng, Double minDistance) {
-        if(userLat.equals(0.0d) || userLng.equals(0.0d)) return minDistance;
+        if(userLat.equals(0.0d) || userLng.equals(0.0d) ||mappoint == null) return minDistance;
         Double result = minDistance;
+
+
         for (Map<String, Object> scooter: mappoint) {
             Double distance = distanceByHarversine(userLat, userLng,
                     (Double) scooter.get("lat"), (Double) scooter.get("lng"));
@@ -226,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 result = distance;
             }
         }
+
         return result;
     }
 
