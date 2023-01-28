@@ -58,39 +58,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView textView;
-        Call<data_model> call;
 
-
-        textView = findViewById(R.id.txt_view);
-
-        call = retrofit_client.getApiService().test_api_get("37.53505700000015","126.98862500000007");//url 파라미터
-        Log.e("test2", "test2 "+call.request().url());
-
-        call.enqueue(new Callback<data_model>(){
-            //콜백 받는 부분
-            @Override
-            public void onResponse(Call<data_model> call, Response<data_model> response) {
-
-
-                if(response.code()==200){
-                    data_model result = response.body();
-                    String str;
-                    str= result.getIsSuccess() +"\n"+
-                            result.getMessage()+"\n"+
-                            result.getCode()+"\n"+
-                            result.getResult()+"\n";
-                    textView.setText(str);
-                    Log.e("test2", "test2 "+str);
-                    
-                    updataMapMarkers(result);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<data_model> call, Throwable t) {
-            }
-        });
+        APIThread thread = new APIThread();
+        thread.start();
 
         NaverMapOptions options = new NaverMapOptions()
                 .locationButtonEnabled(true);
@@ -101,6 +71,70 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
+    }
+
+
+    /** API 쓰레드 구현
+     *  60초 마다
+     *  현재 백엔드 API endpoint: https://one-humqo.run.goorm.app/api/location
+     *
+     *  GET형식
+     *  파라미터 lat, lng
+     *  사용자 좌표 변수명 userLat, userLng
+     * */
+    private class APIThread extends Thread {
+        private static final String TAG = "APIThread";
+
+        public APIThread() {
+            // 초기화 작업
+        }
+
+        public void run() {
+
+            int second = 0;
+
+            while (true) {
+                second++;
+                try {
+                    // 스레드에게 수행시킬 동작들 구현
+                    Call<data_model> call;
+                    call = retrofit_client.getApiService().test_api_get(userLat, userLng);//url 파라미터
+                    Log.e("test2", "test2 "+call.request().url());
+
+
+                    call.enqueue(new Callback<data_model>(){
+                        //콜백 받는 부분
+                        @Override
+                        public void onResponse(Call<data_model> call, Response<data_model> response) {
+
+
+                            if(response.code()==200){
+                                data_model result = response.body();
+                                String str;
+                                str= result.getIsSuccess() +"\n"+
+                                        result.getMessage()+"\n"+
+                                        result.getCode()+"\n"+
+                                        result.getResult()+"\n";
+
+                                Log.e("test2", "test2 "+str);
+
+                                updataMapMarkers(result);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<data_model> call, Throwable t) {
+                        }
+                    });//60초마다 실행
+                    Thread.sleep(60000); // 1초간 Thread를 잠재운다
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    ;
+                }
+
+                Log.i("경과된 시간 : ", Integer.toString(second));
+            }
+        }
     }
 
     private void updataMapMarkers(data_model result) {
@@ -159,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Double minDistance = MAX_DISTANCE;
                 minDistance = calcMinDistance(userLat, userLng, minDistance);
                 Log.e("min",minDistance + "");
+
+
 
                 // 거리에 따른 진동 발생 (수정 예정)
                 Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);

@@ -12,8 +12,8 @@ public interface Retrofit_interface {
         Call<data_model> test_api_get(
                 //@Path("UserID") String userid);
                 //@Query("id") String id
-                @Query("lat") String lat, //파리미터들
-                @Query("lng") String lng //파리미터들
+                @Query("lat") double lat, //파리미터들
+                @Query("lng") double lng //파리미터들
 //                @Query("version") String version,
 //                @Query("lat") String lat,
 //                @Query("lng") String lng,
