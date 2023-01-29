@@ -1,7 +1,9 @@
 package com.example.one_son;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
@@ -54,8 +56,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_ONESoN);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
 
         APIThread thread = new APIThread();
@@ -242,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
-        if(minDistance >= MAX_DISTANCE) return;
+        //if(minDistance >= MAX_DISTANCE) return;
         if(minDistance < 1) minDistance = 1.0;
         //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
         long[] pattern = {(long) (minDistance * 10), (long) (minDistance * 10)};
