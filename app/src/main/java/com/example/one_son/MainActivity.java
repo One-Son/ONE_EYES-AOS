@@ -231,7 +231,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
-        if(minDistance >= MAX_DISTANCE) return;
+        if(minDistance >= MAX_DISTANCE) {
+            vibrator.cancel();
+            return;
+        }
         if(minDistance < 1) minDistance = 1.0;
         double timeDelay = minDistance * 50 - 49;
         //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
@@ -251,8 +254,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Double result = MAX_DISTANCE;
 
         for (Map<String, Object> scooter: mappoint) {
-            Double distance = distanceByHarversine(userLat, userLng,
-                    (Double) scooter.get("lat"), (Double) scooter.get("lng"));
+            double scooterLat = (double) scooter.get("lat");
+            double scooterLng = (double) scooter.get("lng");
+            double boundaryLange = 0.0001; // 대략 10m
+
+            if(Math.abs(userLat - scooterLat) > boundaryLange ||
+                    Math.abs(userLng - scooterLng) > boundaryLange) {
+                continue;
+            }
+
+            Double distance = distanceByHarversine(userLat, userLng, scooterLat, scooterLng);
             if(distance < result){
                 result = distance;
             }
