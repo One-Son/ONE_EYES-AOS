@@ -36,7 +36,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback{
     private static final int ACCESS_LOCATION_PERMISSION_REQUEST_CODE = 100;
-    private static final Double MAX_DISTANCE = 200.0;
+    private static final Double MAX_DISTANCE = 5.0;
 
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTheme(R.style.Theme_ONESoN);
 
         APIThread thread = new APIThread();
         thread.start();
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         public void run() {
 
-            int second = 0;
+
 
             try {
                 Thread.sleep(3000);
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
             while (true) {
-                second++;
+
                 try {
                     // 스레드에게 수행시킬 동작들 구현
                     Call<data_model> call;
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     e.printStackTrace();
                 }
 
-                Log.i("경과된 시간 : ", Integer.toString(second));
+
             }
 
         }
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         locationSource = new FusedLocationSource(this, ACCESS_LOCATION_PERMISSION_REQUEST_CODE);
         naverMap.setLocationSource(locationSource);
-        naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
+        //naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
         UiSettings uiSettings = naverMap.getUiSettings();
         uiSettings.setLocationButtonEnabled(true);
 
@@ -231,9 +232,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
         if(minDistance >= MAX_DISTANCE) return;
         if(minDistance < 1) minDistance = 1.0;
+        double timeDelay = minDistance * 50 - 49;
         //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
-        long[] pattern = {(long) (minDistance * 10), (long) (minDistance * 10)};
-        vibrator.vibrate(pattern, (int) (250 / minDistance / minDistance));
+        long[] pattern = {(long) (timeDelay * 10), (long) (timeDelay * 10)};
+        vibrator.vibrate(pattern, (int) (250 / timeDelay / timeDelay));
     }
 
     /**
