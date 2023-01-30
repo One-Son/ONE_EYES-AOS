@@ -254,8 +254,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Double result = MAX_DISTANCE;
 
         for (Map<String, Object> scooter: mappoint) {
-            Double distance = distanceByHarversine(userLat, userLng,
-                    (Double) scooter.get("lat"), (Double) scooter.get("lng"));
+            double scooterLat = (double) scooter.get("lat");
+            double scooterLng = (double) scooter.get("lng");
+            double boundaryLange = 0.0001; // 대략 10m
+
+            if(Math.abs(userLat - scooterLat) > boundaryLange ||
+                    Math.abs(userLng - scooterLng) > boundaryLange) {
+                continue;
+            }
+
+            Double distance = distanceByHarversine(userLat, userLng, scooterLat, scooterLng);
             if(distance < result){
                 result = distance;
             }
