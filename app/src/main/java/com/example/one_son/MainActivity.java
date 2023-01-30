@@ -14,13 +14,11 @@ import android.util.Log;
 import com.example.one_son.Retrofit.data_model;
 import com.example.one_son.Retrofit.retrofit_client;
 import com.naver.maps.geometry.LatLng;
-import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.NaverMapOptions;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
-import com.naver.maps.map.overlay.InfoWindow;
 import com.naver.maps.map.overlay.LocationOverlay;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.OverlayImage;
@@ -46,9 +44,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private double userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +86,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         public void run() {
 
-
-
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
@@ -105,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Call<data_model> call;
                     call = retrofit_client.getApiService().test_api_get(userLat, userLng);//url 파라미터
                     Log.e("test2", "test2 "+call.request().url());
-
 
                     call.enqueue(new Callback<data_model>(){
                         //콜백 받는 부분
@@ -141,13 +133,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-
             }
-
         }
     }
-
 
     private class DistanceThread extends Thread {
 
@@ -159,8 +147,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             while (true) {
                 try {
-                    // 거리에 따른 진동 발생 (거리 조절 필요)
-
+                    // 거리에 따른 진동 발생
                     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     vibrateByDistance(minDistance, vibrator);
                     Log.e("vibrate", vibrator.hasVibrator() + "");
@@ -226,6 +213,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 minDistance = calcMinDistance(userLat, userLng);
 
             }
+        });
+        naverMap.addOnOptionChangeListener(() -> {
+            locationSource.setCompassEnabled(true);
         });
     }
 
