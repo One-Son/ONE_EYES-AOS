@@ -1,16 +1,13 @@
 package com.example.one_son;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
 
@@ -43,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private FusedLocationSource locationSource;
     private NaverMap naverMap;
-    private InfoWindow infoWindow;
     private List<Marker> markerList = new ArrayList<Marker>();
     private boolean isCameraAnimated = false;
     private double minDistance = MAX_DISTANCE;
@@ -56,11 +52,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.Theme_ONESoN);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        setTheme(R.style.Theme_ONESoN);
 
         APIThread thread = new APIThread();
         thread.start();
@@ -89,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      *  사용자 좌표 변수명 userLat, userLng
      * */
     private class APIThread extends Thread {
-
 
         public APIThread() {
             // 초기화 작업
@@ -157,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private class DistanceThread extends Thread {
 
-
         public DistanceThread() {
             // 초기화 작업
         }
@@ -165,10 +157,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void run() {
 
             while (true) {
-
                 try {
-
-                    // 거리에 따른 진동 발생 (수정 예정)
+                    // 거리에 따른 진동 발생 (거리 조절 필요)
 
                     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     vibrateByDistance(minDistance, vibrator);
@@ -178,10 +168,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-
             }
-
         }
     }
 
@@ -202,8 +189,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
-
     private void resetMarkerList() {
         if(markerList != null && markerList.size() > 0){
             for(Marker marker : markerList){
@@ -212,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             markerList.clear();
         }
     }
-
 
     @Override
     public void onMapReady(@NonNull NaverMap naverMap) {
@@ -238,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.e("latlng", userLat + ", " + userLng);
 
                 //현위치로 부터 가장 가까운 스쿠터 거리 계산
-                minDistance = calcMinDistance(userLat, userLng, minDistance);
+                minDistance = calcMinDistance(userLat, userLng);
 
             }
         });
@@ -246,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
-        //if(minDistance >= MAX_DISTANCE) return;
+        if(minDistance >= MAX_DISTANCE) return;
         if(minDistance < 1) minDistance = 1.0;
         //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
         long[] pattern = {(long) (minDistance * 10), (long) (minDistance * 10)};
@@ -258,22 +242,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * mappoint는 전역변수
      * @param userLat 유저 위도
      * @param userLng 유저 경도
-     * @param minDistance 현재 최소 값
      * @return 최소 값
      */
-    private Double calcMinDistance(Double userLat, Double userLng, Double minDistance) {
-        if(userLat.equals(0.0d) || userLng.equals(0.0d) ||mappoint == null) return minDistance;
-        Double result = minDistance;
-
+    private Double calcMinDistance(Double userLat, Double userLng) {
+        if(userLat.equals(0.0d) || userLng.equals(0.0d) || mappoint == null) return MAX_DISTANCE;
+        Double result = MAX_DISTANCE;
 
         for (Map<String, Object> scooter: mappoint) {
             Double distance = distanceByHarversine(userLat, userLng,
                     (Double) scooter.get("lat"), (Double) scooter.get("lng"));
-            if(distance < minDistance){
+            if(distance < result){
                 result = distance;
             }
         }
-
         return result;
     }
 
