@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTheme(R.style.Theme_ONESoN);
 
         APIThread thread = new APIThread();
         thread.start();
