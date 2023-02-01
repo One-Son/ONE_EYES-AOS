@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isCameraAnimated = false;
     private double minDistance = MAX_DISTANCE;
 
-    private double userLat, userLng; // 사용자 좌표
+    private String userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
 
     @Override
@@ -150,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     // 거리에 따른 진동 발생
                     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                     vibrateByDistance(minDistance, vibrator);
-                    Log.e("vibrate", vibrator.hasVibrator() + "");
 
                     Thread.sleep(5000); // 5초간 Thread를 잠재운다
                 } catch (InterruptedException e) {
@@ -166,9 +165,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mappoint = new ArrayList<>(result.getResult());
 //            latng.addAll(result.getResult());
             for (Map<String, Object> scooter: mappoint) {
-                scooter.get("lng");
                 Marker marker = new Marker();
-                marker.setPosition(new LatLng((Double) scooter.get("lat"), (Double) scooter.get("lng")));
+                marker.setPosition(new LatLng( Double.parseDouble(scooter.get("lat").toString()), Double.parseDouble(scooter.get("lng").toString())));
                 marker.setIcon(OverlayImage.fromResource(R.drawable.ic_baseline_location_on_24));
                 marker.setAnchor(new PointF(0.5f, 1.0f));
                 marker.setMap(naverMap);
@@ -204,13 +202,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onLocationChange(@NonNull Location location) {
-                userLat = location.getLatitude();
-                userLng = location.getLongitude();
+                userLat = Double.toString(location.getLatitude());
+                userLng = Double.toString(location.getLongitude());
 
                 Log.e("latlng", userLat + ", " + userLng);
 
                 //현위치로 부터 가장 가까운 스쿠터 거리 계산
-                minDistance = calcMinDistance(userLat, userLng);
+                minDistance = calcMinDistance(Double.parseDouble(userLat), Double.parseDouble(userLng));
 
             }
         });
@@ -244,8 +242,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Double result = MAX_DISTANCE;
 
         for (Map<String, Object> scooter: mappoint) {
-            double scooterLat = (double) scooter.get("lat");
-            double scooterLng = (double) scooter.get("lng");
+            double scooterLat = Double.parseDouble(scooter.get("lat").toString());
+            double scooterLng = Double.parseDouble(scooter.get("lng").toString());
             double boundaryLange = 0.0001; // 대략 10m
 
             if(Math.abs(userLat - scooterLat) > boundaryLange ||
