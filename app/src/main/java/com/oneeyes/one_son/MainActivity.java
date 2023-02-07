@@ -12,8 +12,11 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+import com.naver.maps.map.widget.LocationButtonView;
 import com.oneeyes.one_son.Retrofit.data_model;
 import com.oneeyes.one_son.Retrofit.retrofit_client;
 import com.naver.maps.geometry.LatLng;
@@ -73,6 +76,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
+
+        Button addressbtn = (Button)findViewById(R.id.address);
+
+        addressbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getAddress(Double.parseDouble(userLat),Double.parseDouble(userLng));
+            }
+        });
 
 
     }
@@ -198,12 +210,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationOverlay.setVisible(true);
 
         this.naverMap = naverMap;
-
         locationSource = new FusedLocationSource(this, ACCESS_LOCATION_PERMISSION_REQUEST_CODE);
         naverMap.setLocationSource(locationSource);
         naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
         UiSettings uiSettings = naverMap.getUiSettings();
-        uiSettings.setLocationButtonEnabled(true);
+        uiSettings.setLocationButtonEnabled(false);
+        uiSettings.setScaleBarEnabled(false);
+        LocationButtonView locationButtonView = findViewById(R.id.currentLocationButton);
+        locationButtonView.setMap(naverMap);
 
 
         //현 위치 갱신
@@ -308,10 +322,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return distance;
     }
 
-    public String getAddress(Context mContext, double lat, double lng)
+    public String getAddress( double lat, double lng)
     {
         String nowAddr ="현재 위치를 확인 할 수 없습니다.";
-        Geocoder geocoder = new Geocoder(mContext, Locale.KOREA);
+        Geocoder geocoder = new Geocoder(this, Locale.KOREA);
         List<Address> address;
 
         try
@@ -322,12 +336,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (address != null && address.size() > 0)
                 {
                     nowAddr = address.get(0).getAddressLine(0).toString();
+                    Toast.makeText(this,"해당 주소는 "+nowAddr+"입니다.", Toast.LENGTH_LONG).show();
                 }
             }
         }
         catch (IOException e)
         {
-            Toast.makeText(mContext, "주소를 가져 올 수 없습니다.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "주소를 가져 올 수 없습니다.", Toast.LENGTH_LONG).show();
             e.printStackTrace();
         }
         return nowAddr;
