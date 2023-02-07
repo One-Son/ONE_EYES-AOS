@@ -5,12 +5,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PointF;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -51,11 +53,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isCameraAnimated = false;
     private double minDistance = MAX_DISTANCE;
 
+    private Context cThis;//context 설정
+    private Button addressbtn;
+    private Button searchbtn;
     private String userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
+    //음성 출력용
+    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        cThis=this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -77,12 +85,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mapFragment.getMapAsync(this);
 
-        Button addressbtn = (Button)findViewById(R.id.address);
-
+        addressbtn = (Button)findViewById(R.id.address);
         addressbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getAddress(Double.parseDouble(userLat),Double.parseDouble(userLng));
+            }
+        });
+
+        searchbtn = (Button) findViewById(R.id.search);
+        searchbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SearchlocationActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        //음성출력 생성, 리스너 초기화
+        tts=new TextToSpeech(cThis, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status!=android.speech.tts.TextToSpeech.ERROR){
+                    tts.setLanguage(Locale.KOREAN);
+                }
             }
         });
 
@@ -322,6 +348,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return distance;
     }
 
+
     public String getAddress( double lat, double lng)
     {
         String nowAddr ="현재 위치를 확인 할 수 없습니다.";
@@ -337,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 {
                     nowAddr = address.get(0).getAddressLine(0).toString();
                     Toast.makeText(this,"해당 주소는 "+nowAddr+"입니다.", Toast.LENGTH_LONG).show();
+                    FuncVoiceOut("nowAddr");//전등을 끕니다 라는 음성 출력
                 }
             }
         }
@@ -346,5 +374,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
         return nowAddr;
+    }
+
+    //음성 메세지 출력용
+    private void FuncVoiceOut(String OutMsg){
+        if(OutMsg.length()<1)return;
+
+        tts.setPitch(1.0f);//목소리 톤1.0
+        tts.setSpeechRate(1.0f);//목소리 속도
+        tts.speak(OutMsg,TextToSpeech.QUEUE_FLUSH,null);
+
+        //어플이 종료할때는 완전히 제거
+
     }
 }
