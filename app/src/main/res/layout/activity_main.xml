@@ -19,7 +19,7 @@
 
     <!-- Toolbar -->
     <include
-        android:id="@+id/toolbar_register"
+        android:id="@+id/tool_bar"
         layout="@layout/tool_bar"/>
 
             <fragment android:layout_width="match_parent"
@@ -30,6 +30,19 @@
 
 
 
+                <Button
+                    android:id="@+id/search"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="20dp"
+                    android:textSize="15sp"
+                    android:textColor="@color/gray"
+                    android:textStyle="bold"
+                    android:background="@drawable/stt"
+                    android:text="    어디가 궁금하신가요?" />
 
                 <Button
                     android:id="@+id/address"
@@ -42,21 +55,20 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:background="@drawable/round_button"
+                    android:textColor="@color/white"
                     android:text="현재 위치 말하기" />
 
 
 
                 <com.naver.maps.map.widget.LocationButtonView
-                    android:layout_gravity="right|top"
+                    android:layout_gravity="left|center"
 
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/currentLocationButton"
 
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentRight="true"
+
                     />
 
 
