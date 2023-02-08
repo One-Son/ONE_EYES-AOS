@@ -15,7 +15,6 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -26,7 +25,6 @@ public class SearchlocationActivity extends AppCompatActivity {
 
 
     Context cThis;//context 설정
-    String LogTT="[STT]";//LOG타이틀
     //음성 인식용
     Intent SttIntent;
     SpeechRecognizer mRecognizer;
@@ -35,13 +33,14 @@ public class SearchlocationActivity extends AppCompatActivity {
 
     // 화면 처리용
     private ImageButton btnSttStart;
-    EditText txtInMsg;
-    TextView txtSystem;
+    private TextView txtInMsg;
+    private TextView txtSystem;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         cThis=this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_searchlocation);
+
 
         //음성인식
         SttIntent=new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -76,7 +75,7 @@ public class SearchlocationActivity extends AppCompatActivity {
                 }
             }
         });
-        txtInMsg=(EditText)findViewById(R.id.txtInMsg);
+        txtInMsg=(TextView)findViewById(R.id.txtInMsg);
         txtSystem=(TextView)findViewById(R.id.txtSystem);
         //어플이 실행되면 자동으로 1초뒤에 음성 인식 시작
         new android.os.Handler().postDelayed(new Runnable() {
@@ -95,7 +94,7 @@ public class SearchlocationActivity extends AppCompatActivity {
 
         @Override
         public void onBeginningOfSpeech() {
-            txtSystem.setText("지금부터 말을 해주세요."+"\r\n"+txtSystem.getText());
+            txtSystem.setText("지금부터 말을 해주세요.");
         }
 
         @Override
@@ -105,12 +104,12 @@ public class SearchlocationActivity extends AppCompatActivity {
 
         @Override
         public void onBufferReceived(byte[] bytes) {
-            txtSystem.setText("onBufferReceived."+"\r\n"+txtSystem.getText());
+            txtSystem.setText("듣는 중.");
         }
 
         @Override
         public void onEndOfSpeech() {
-            txtSystem.setText("onEndOfSpeech."+"\r\n"+txtSystem.getText());
+            txtSystem.setText("듣는 중..");
         }
 
         @Override
@@ -125,7 +124,7 @@ public class SearchlocationActivity extends AppCompatActivity {
             ArrayList<String> mResult =results.getStringArrayList(key);
             String[] rs = new String[mResult.size()];
             mResult.toArray(rs);
-            txtInMsg.setText(rs[0]+"\r\n"+txtInMsg.getText());
+            txtInMsg.setText(rs[0]);
             FuncVoiceOrderCheck(rs[0]);
             mRecognizer.startListening(SttIntent);
 
@@ -133,12 +132,12 @@ public class SearchlocationActivity extends AppCompatActivity {
 
         @Override
         public void onPartialResults(Bundle bundle) {
-            txtSystem.setText("onPartialResults..........."+"\r\n"+txtSystem.getText());
+            txtSystem.setText("듣는 중...");
         }
 
         @Override
         public void onEvent(int i, Bundle bundle) {
-            txtSystem.setText("onEvent..........."+"\r\n"+txtSystem.getText());
+            txtSystem.setText("듣는 중....");
         }
     };
     //입력된 음성 메세지 확인 후 동작 처리
@@ -147,16 +146,21 @@ public class SearchlocationActivity extends AppCompatActivity {
 
         VoiceMsg=VoiceMsg.replace(" ","");//공백제거
 
-        txtSystem.setText("oㄴn."+"\r\n"+VoiceMsg);
-        if(VoiceMsg.indexOf("카카오톡")>-1 || VoiceMsg.indexOf("카톡")>-1){
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.kakao.talk");
-            startActivity(launchIntent);
-            onDestroy();
-        }//카카오톡 어플로 이동
-        if(VoiceMsg.indexOf("전동꺼")>-1 || VoiceMsg.indexOf("불꺼")>-1){
-            FuncVoiceOut("전등을 끕니다");//전등을 끕니다 라는 음성 출력
-            txtSystem.setText("on."+"\r\n"+VoiceMsg);
-        }
+
+        if(VoiceMsg != null){
+            //FuncVoiceOut(" "+VoiceMsg);// 음성 출력
+//            //intent 메인 엑티비티 이동
+            Intent intent= new Intent();
+            intent.putExtra("VoiceMsg",VoiceMsg);
+            setResult(RESULT_OK,intent);
+            finish();
+
+        }// 메인으로 이동
+
+//        if(VoiceMsg.indexOf("전동꺼")>-1 || VoiceMsg.indexOf("불꺼")>-1){
+//            FuncVoiceOut("전등을 끕니다");//전등을 끕니다 라는 음성 출력
+//            txtSystem.setText("on."+"\r\n"+VoiceMsg);
+//        }
     }
 
 
@@ -172,7 +176,7 @@ public class SearchlocationActivity extends AppCompatActivity {
         //어플이 종료할때는 완전히 제거
 
     }
-    //카톡으로 이동을 했는데 음성인식 어플이 종료되지 않아 계속 실행되는 경우를 막기위해 어플 종료 함수
+    // 이동을 했는데 음성인식 어플이 종료되지 않아 계속 실행되는 경우를 막기위해 어플 종료 함수
     @Override
     protected void onDestroy() {
         super.onDestroy();

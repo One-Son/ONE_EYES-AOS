@@ -24,7 +24,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="150dp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@+id/txtInMsg"
+
         />
 
     <ImageButton
@@ -36,17 +36,19 @@
         android:background="@drawable/mic"
         android:src="@drawable/ic_baseline_mic_24" />
 
-    <EditText
+    <TextView
         android:id="@+id/txtInMsg"
-        android:layout_width="345dp"
-        android:layout_height="201dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
-        android:ems="10"
         android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mic" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="100dp"
+
+        android:textColor="#000000"
+        android:textSize="28sp"
+        />
 
 
 
