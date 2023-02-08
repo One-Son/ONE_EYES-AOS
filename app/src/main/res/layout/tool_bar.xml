@@ -29,7 +29,7 @@
         android:textColor="@color/white"
         android:layout_gravity="center"
         android:id="@+id/toolbar_title"
-        android:textSize="22sp"
+        android:textSize="20sp"
         />
 
 </androidx.appcompat.widget.Toolbar>

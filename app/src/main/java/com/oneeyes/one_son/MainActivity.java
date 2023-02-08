@@ -1,5 +1,7 @@
 package com.oneeyes.one_son;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -61,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     //음성 출력용
     private TextToSpeech tts;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         cThis=this;
@@ -98,9 +102,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, SearchlocationActivity.class);
-                startActivity(intent);
+                getSearchActivityResult.launch(intent);
+
+
             }
+
         });
+
 
         //음성출력 생성, 리스너 초기화
         tts=new TextToSpeech(cThis, new TextToSpeech.OnInitListener() {
@@ -113,7 +121,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
 
+
     }
+
+
 
 
     /** API 쓰레드 구현
@@ -364,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 {
                     nowAddr = address.get(0).getAddressLine(0).toString();
                     Toast.makeText(this,"해당 주소는 "+nowAddr+"입니다.", Toast.LENGTH_LONG).show();
-                    FuncVoiceOut("nowAddr");//전등을 끕니다 라는 음성 출력
+                    FuncVoiceOut("해당 주소는 "+nowAddr+"입니다.");// 음성 출력
                 }
             }
         }
@@ -387,4 +398,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //어플이 종료할때는 완전히 제거
 
     }
+
+    private final ActivityResultLauncher<Intent> getSearchActivityResult = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if(result.getResultCode() == RESULT_OK){
+                    result.getData().getStringExtra("VoiceMsg");
+                    Log.e("VoiceMsg",result.getData().getStringExtra("VoiceMsg"));
+                    FuncVoiceOut("해당 주소는 "+result.getData().getStringExtra("VoiceMsg")+"입니다.");// 음성 출력
+                }
+            }
+
+    );
 }
