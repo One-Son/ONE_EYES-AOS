@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.widget.LocationButtonView;
 import com.oneeyes.one_son.Retrofit.data_model;
 import com.oneeyes.one_son.Retrofit.retrofit_client;
@@ -88,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             fm.beginTransaction().add(R.id.map, mapFragment).commit();
         }
         mapFragment.getMapAsync(this);
+
 
         addressbtn = (Button)findViewById(R.id.address);
         addressbtn.setOnClickListener(new View.OnClickListener() {
@@ -180,11 +182,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onFailure(Call<data_model> call, Throwable t) {
                         }
                     });//60초마다 실행
-                    // 거리에 따른 진동 발생 (수정 예정)
-
-                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                    vibrateByDistance(minDistance, vibrator);
-                    Log.e("vibrate", vibrator.hasVibrator() + "");
 
                     Thread.sleep(60000); // 5초간 Thread를 잠재운다
                 } catch (InterruptedException e) {
@@ -245,14 +242,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull NaverMap naverMap) {
         LocationOverlay locationOverlay = naverMap.getLocationOverlay();
         locationOverlay.setVisible(true);
-
         this.naverMap = naverMap;
+
+
+        CameraPosition cameraPosition = new CameraPosition(
+                new LatLng(33.38, 126.55),  // 위치 지정
+                17                           // 줌 레벨
+        );
+
+        naverMap.setCameraPosition(cameraPosition);
         locationSource = new FusedLocationSource(this, ACCESS_LOCATION_PERMISSION_REQUEST_CODE);
         naverMap.setLocationSource(locationSource);
         naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
         UiSettings uiSettings = naverMap.getUiSettings();
-        uiSettings.setLocationButtonEnabled(false);
-        uiSettings.setScaleBarEnabled(false);
+        uiSettings.setLocationButtonEnabled(false);//현위치 버튼
+        uiSettings.setCompassEnabled(false);//나침반
+        uiSettings.setScaleBarEnabled(false);//축적바
+        uiSettings.setZoomControlEnabled(false); // 줌버튼
+
         LocationButtonView locationButtonView = findViewById(R.id.currentLocationButton);
         locationButtonView.setMap(naverMap);
 

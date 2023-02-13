@@ -23,6 +23,8 @@ public class data_model {
         private List result;
 
 
+
+
         public Boolean getIsSuccess(){
                 return isSuccess;
         }
@@ -39,6 +41,8 @@ public class data_model {
         public List getResult(){
                 return result;
         }
+
+
 
 
 //        @SerializedName("kickscooters")
