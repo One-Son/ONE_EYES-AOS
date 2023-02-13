@@ -158,35 +158,7 @@ public class SearchlocationActivity extends AppCompatActivity {
         if(VoiceMsg != null){
             //FuncVoiceOut(" "+VoiceMsg);// 음성 출력
 
-            //주소 검색 API
-            Call<data_model> call;
-            call = retrofit_client.getKakaoApiService().kakao_api_get(userLat, userLng);//url 파라미터
-            Log.e("test2", "test2 "+call.request().url());
 
-            call.enqueue(new Callback<data_model>(){
-                //콜백 받는 부분
-                @Override
-                public void onResponse(Call<data_model> call, Response<data_model> response) {
-
-                    //여기 수정
-                    if(response.code()==200){
-                        data_model result = response.body();
-                        String str;
-                        str= result.getIsSuccess() +"\n"+
-                                result.getMessage()+"\n"+
-                                result.getCode()+"\n"+
-                                result.getResult()+"\n";
-
-                        Log.e("test2", "test2 "+str);
-
-
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<data_model> call, Throwable t) {
-                }
-            });
 
             //intent 메인 엑티비티 이동
             Intent intent= new Intent();

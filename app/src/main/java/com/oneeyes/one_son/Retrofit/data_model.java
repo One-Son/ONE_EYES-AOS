@@ -22,6 +22,9 @@ public class data_model {
         @Expose
         private List result;
 
+        @SerializedName("place")
+        @Expose
+        private List place;
 
 
 
@@ -37,9 +40,12 @@ public class data_model {
                 return code;
         }
 
-
         public List getResult(){
                 return result;
+        }
+
+        public List getPlace(){
+                return place;
         }
 
 
