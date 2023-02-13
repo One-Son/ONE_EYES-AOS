@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button searchbtn;
     private String userLat, userLng; // 사용자 좌표
     private List<Map<String ,Object>> mappoint;
+    private List<Map<String ,Object>> mapsearchpoint;
     //음성 출력용
     private TextToSpeech tts;
 
@@ -383,6 +384,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     nowAddr = address.get(0).getAddressLine(0).toString();
                     Toast.makeText(this,"해당 주소는 "+nowAddr+"입니다.", Toast.LENGTH_LONG).show();
                     FuncVoiceOut("해당 주소는 "+nowAddr+"입니다.");// 음성 출력
+
                 }
             }
         }
@@ -410,9 +412,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if(result.getResultCode() == RESULT_OK){
-                    result.getData().getStringExtra("VoiceMsg");
+                    String VoiceMsg = result.getData().getStringExtra("VoiceMsg");
+
+
+                    //주소 검색 API
+                    Call<data_model> call;
+                    call = retrofit_client.getKakaoApiService().kakao_api_get("https://map.kakao.com/",VoiceMsg);//url 파라미터
+
+                    Log.e("test2", "test2 "+call.request().url());
+                    call.enqueue(new Callback<data_model>(){
+                        //콜백 받는 부분
+                        @Override
+                        public void onResponse(Call<data_model> call, Response<data_model> response) {
+
+
+                            //여기 수정
+                            if(response.code()==200){
+                                String str;
+                                data_model result = response.body();
+                                str= result.getPlace()+"\n";
+                                Log.e("test", "test "+str);
+                                mapsearchpoint = new ArrayList<>(result.getPlace());
+
+                                Double.parseDouble(mapsearchpoint.get(0).get("lat").toString());
+                                Double.parseDouble(mapsearchpoint.get(0).get("lon").toString());
+                                Double distance = distanceByHarversine(Double.parseDouble(userLat), Double.parseDouble(userLng), Double.parseDouble(mapsearchpoint.get(0).get("lat").toString()), Double.parseDouble(mapsearchpoint.get(0).get("lon").toString()));
+                                FuncVoiceOut("현재"+ VoiceMsg +"과의 거리는"+distance.intValue()+"미터 떨어져 있습니다.");// 음성 출력
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<data_model> call, Throwable t) {
+                            FuncVoiceOut("현재 위치 주소를 찾을 수 없습니다.");// 음성 출력
+                        }
+                    });
+
+
                     Log.e("VoiceMsg",result.getData().getStringExtra("VoiceMsg"));
-                    FuncVoiceOut("해당 주소는 "+result.getData().getStringExtra("VoiceMsg")+"입니다.");// 음성 출력
+                    //FuncVoiceOut("해당 주소는 "+result.getData().getStringExtra("VoiceMsg")+"입니다.");// 음성 출력
                 }
             }
 
