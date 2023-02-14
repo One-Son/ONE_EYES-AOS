@@ -12,7 +12,9 @@ import android.graphics.PointF;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -36,7 +38,6 @@ import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.OverlayImage;
 import com.naver.maps.map.util.FusedLocationSource;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -73,13 +74,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         setTheme(R.style.Theme_ONESoN);
         APIThread thread = new APIThread();
         thread.start();
-
-        DistanceThread thread2 = new DistanceThread();
-        thread2.start();
 
         NaverMapOptions options = new NaverMapOptions()
                 .locationButtonEnabled(true);
@@ -91,11 +88,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mapFragment.getMapAsync(this);
 
-
         addressbtn = (Button)findViewById(R.id.address);
         addressbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(userLat == null || userLng == null) return;
                 getAddress(Double.parseDouble(userLat),Double.parseDouble(userLng));
             }
         });
@@ -106,12 +103,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, SearchlocationActivity.class);
                 getSearchActivityResult.launch(intent);
-
-
             }
-
         });
-
 
         //음성출력 생성, 리스너 초기화
         tts=new TextToSpeech(cThis, new TextToSpeech.OnInitListener() {
@@ -123,12 +116,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
-
+        DistanceThread thread2 = new DistanceThread();
+        thread2.start();
     }
-
-
-
 
     /** API 쓰레드 구현
      *  60초 마다
@@ -145,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         public void run() {
-
             try {
                 Thread.sleep(4000);
             } catch (InterruptedException e) {
@@ -163,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         //콜백 받는 부분
                         @Override
                         public void onResponse(Call<data_model> call, Response<data_model> response) {
-
 
                             if(response.code()==200){
                                 data_model result = response.body();
@@ -183,8 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void onFailure(Call<data_model> call, Throwable t) {
                         }
                     });//60초마다 실행
-
-                    Thread.sleep(60000); // 5초간 Thread를 잠재운다
+                    Thread.sleep(60000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -199,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         public void run() {
-
             while (true) {
                 try {
                     // 거리에 따른 진동 발생
@@ -245,11 +231,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         locationOverlay.setVisible(true);
         this.naverMap = naverMap;
 
-
         CameraPosition cameraPosition = new CameraPosition(
-                new LatLng(33.38, 126.55),  // 위치 지정
-                17                           // 줌 레벨
-        );
+                new LatLng(33.38, 126.55),17);  // 위치 지정                           // 줌 레벨
 
         naverMap.setCameraPosition(cameraPosition);
         locationSource = new FusedLocationSource(this, ACCESS_LOCATION_PERMISSION_REQUEST_CODE);
@@ -264,7 +247,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocationButtonView locationButtonView = findViewById(R.id.currentLocationButton);
         locationButtonView.setMap(naverMap);
 
-
         //현 위치 갱신
         naverMap.addOnLocationChangeListener(new NaverMap.OnLocationChangeListener(){
 
@@ -275,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 Log.e("latlng", userLat + ", " + userLng);
 
+                if(userLat == null || userLng == null) return;
                 //현위치로 부터 가장 가까운 스쿠터 거리 계산
                 minDistance = calcMinDistance(Double.parseDouble(userLat), Double.parseDouble(userLng));
 
@@ -287,18 +270,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // 진동 발생 함수
     private void vibrateByDistance(Double minDistance, Vibrator vibrator) {
-        if(minDistance >= MAX_DISTANCE) {
-            vibrator.cancel();
+        vibrator.cancel();
+        if (minDistance >= MAX_DISTANCE) {
             return;
         }
-        if(minDistance < 1) minDistance = 1.0;
-        double timeDelay = minDistance * 50 - 49;
+        double timeDelay = minDistance * 400;
         //vibrator.vibrate((int) Math.round(5000 - minDistance * 25)); // 1000이 1초간 진동
-        long[] pattern = {(long) (timeDelay * 10), (long) (timeDelay * 10)};
-        vibrator.vibrate(pattern, (int) (250 / timeDelay / timeDelay));
+        long[] pattern = {(long) (timeDelay + 100), (long) (timeDelay + 100)};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0));
+        }
+        else {
+            vibrator.vibrate(pattern, 0);
+        }
     }
 
-    /**
+        /**
      * 최소 거리 구하기
      * mappoint는 전역변수
      * @param userLat 유저 위도
@@ -308,7 +295,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Double calcMinDistance(Double userLat, Double userLng) {
         if(userLat.equals(0.0d) || userLng.equals(0.0d) || mappoint == null) return MAX_DISTANCE;
         Double result = MAX_DISTANCE;
-
         for (Map<String, Object> scooter: mappoint) {
             double scooterLat = Double.parseDouble(scooter.get("lat").toString());
             double scooterLng = Double.parseDouble(scooter.get("lng").toString());
@@ -367,30 +353,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return distance;
     }
 
-
-    public String getAddress( double lat, double lng)
-    {
+    public String getAddress(double lat, double lng){
         String nowAddr ="현재 위치를 확인 할 수 없습니다.";
         Geocoder geocoder = new Geocoder(this, Locale.KOREA);
         List<Address> address;
 
-        try
-        {
-            if (geocoder != null)
-            {
+        try {
+            if (geocoder != null) {
                 address = geocoder.getFromLocation(lat, lng, 1);
-                if (address != null && address.size() > 0)
-                {
+                if (address != null && address.size() > 0) {
                     nowAddr = address.get(0).getAddressLine(0).toString();
                     Toast.makeText(this,"해당 주소는 "+nowAddr+"입니다.", Toast.LENGTH_LONG).show();
                     FuncVoiceOut("해당 주소는 "+nowAddr+"입니다.");// 음성 출력
-
                 }
             }
         }
-        catch (IOException e)
-        {
-            Toast.makeText(this, "주소를 가져 올 수 없습니다.", Toast.LENGTH_LONG).show();
+        catch (Exception e) {
+            Log.e("error", "NULL 에러 " + e.getMessage());
             e.printStackTrace();
         }
         return nowAddr;
@@ -403,9 +382,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         tts.setPitch(1.0f);//목소리 톤1.0
         tts.setSpeechRate(1.0f);//목소리 속도
         tts.speak(OutMsg,TextToSpeech.QUEUE_FLUSH,null);
-
-        //어플이 종료할때는 완전히 제거
-
     }
 
     private final ActivityResultLauncher<Intent> getSearchActivityResult = registerForActivityResult(
@@ -413,7 +389,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             result -> {
                 if(result.getResultCode() == RESULT_OK){
                     String VoiceMsg = result.getData().getStringExtra("VoiceMsg");
-
 
                     //주소 검색 API
                     Call<data_model> call;
@@ -424,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         //콜백 받는 부분
                         @Override
                         public void onResponse(Call<data_model> call, Response<data_model> response) {
-
 
                             //여기 수정
                             if(response.code()==200){
@@ -438,22 +412,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 Double.parseDouble(mapsearchpoint.get(0).get("lon").toString());
                                 Double distance = distanceByHarversine(Double.parseDouble(userLat), Double.parseDouble(userLng), Double.parseDouble(mapsearchpoint.get(0).get("lat").toString()), Double.parseDouble(mapsearchpoint.get(0).get("lon").toString()));
                                 FuncVoiceOut("현재"+ VoiceMsg +"과의 거리는"+distance.intValue()+"미터 떨어져 있습니다.");// 음성 출력
-
                             }
-
                         }
-
                         @Override
                         public void onFailure(Call<data_model> call, Throwable t) {
                             FuncVoiceOut("현재 위치 주소를 찾을 수 없습니다.");// 음성 출력
                         }
                     });
 
-
                     Log.e("VoiceMsg",result.getData().getStringExtra("VoiceMsg"));
                     //FuncVoiceOut("해당 주소는 "+result.getData().getStringExtra("VoiceMsg")+"입니다.");// 음성 출력
                 }
             }
-
     );
 }
